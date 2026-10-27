@@ -1,0 +1,25 @@
+name: PremiseOps
+on:
+  push:
+  pull_request:
+  schedule:
+    - cron: "0 * * * *" # numbers change even when your code does not
+jobs:
+  premise:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/checkout@v7
+        with:
+          repository: e-skora/premise-ops
+          path: .premise
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+      - run: bun install --frozen-lockfile
+        working-directory: .premise
+      - env:
+          PREMISE_DB_PATH: ${{ runner.temp }}/premise.db
+        run: |
+          bun .premise/bin/premise-cli.ts scan --import
+          bun .premise/bin/premise-cli.ts check
